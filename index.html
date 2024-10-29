@@ -103,6 +103,7 @@
         window.addEventListener("message", ({ origin, data }) => {
           console.log("Processing message from " + origin);
           SvgNest.stop();
+          display.innerHTML = "";
           isworking = false;
           if (!data) {
             startlabel.innerHTML = "Start Nest";
@@ -110,7 +111,8 @@
             return;
           }
           try {
-            var svg = window.SvgNest.parsesvg(data);
+            window.SvgNest.config(data.config);
+            var svg = window.SvgNest.parsesvg(data.svg);
             // display.appendChild(svg);
             const bin = svg.querySelector("rect");
             bin.classList.add("active");
@@ -544,10 +546,27 @@
         function renderSvg(svglist, efficiency, placed, total) {
           iterations++;
           document.getElementById("info_iterations").innerHTML = iterations;
-
           if (!svglist || svglist.length == 0) {
             return;
           }
+          window.parent?.postMessage(
+            {
+              // result: Array.from(svglist[0].children)
+              //   .filter((el) => el.nodeName === "g")
+              //   .map((g) => {
+              //     console.log(g);
+              //     const id = Number(g.firstChild.id.split("-")[0]);
+              //     const transform = g.attributes.transform.value;
+              //     return { id, transform };
+              //   }),
+              result: svglist[0].outerHTML,
+              efficiency,
+              placed,
+              total,
+              config: window.SvgNest.config(),
+            },
+            "*"
+          );
           var bins = document.getElementById("bins");
           bins.innerHTML = "";
 
